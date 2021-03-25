@@ -1,0 +1,91 @@
+EcryptFS - Usando, desvendando suas chaves e recuperando seus arquivos
+
+Procedimento de uso do EcryptFS para descriptografar o /home
+
+Atualmente passei por alguns problemas com o Linux e com isso, foi necessário que eu extraísse todos os dados que tinha nele. Como o meu diretório /home estava criptografado, tive que descriptografá-lo para fazer o backup. Resolvi criar esse procedimento, pois busquei por informações para o ecryptfs na internet mas ainda assim surgiram algumas dúvidas durante a recuperação (principalmente a parte de qual Passphrase/Senha eu deveria usar em cada momento, essas dúvidas estão explicadas aqui.
+
+Procurei fazer o procedimento de forma detalhada, porém, caso ainda tenham alguma sugestão/dúvida, fiquem a vontade para deixar nos comentários!:D
+
+
+Observações iniciais
+1 - Você precisará subir um LiveCD no computador com o disco encriptado. Confirme se o LiveCD possui o ecryptfs instalado; 
+2 - Você precisará de um disco externo para copiar/mover os arquivos decriptados;
+3 - wrapped-passphrase - é o arquivo onde está localizada sua Passphrase de cripografia/decriptografia dos seus arquivos ***NUNCA EXCLUA ESSE ARQUIVO, OU VOCÊ NÃO PODERÁ MAIS RECUPERAR SEUS DADOS***. Essa Passphrase tem 32 dígitos e é algo semelhante a 01df432d41023d300d4f0421dfq43af1 (obviamente essa não é minha Passphrase :D);
+4 - [DISCO_ENCRIPTADO] - O disco onde estão as informações que Você precisa recuperar;
+5 - [DISCO_BACKUP] - O disco para onde Você irá transferir os arquivos recuperados;
+6 - /diretorio_recuperados/ - esse diretório deve ser criado no [DISCO_BACKUP] antes de montar os arquivos encriptados;
+7 user - esse é seu usuário que tem o /home encriptado;
+
+
+Passos para a recuperação:
+
+Passo 1
+Inicie o LiveCD e monte o [DISCO_ENCRIPTADO], não precisa acessar o disco;
+digite o comando:
+sudo ecryptfs-unwrap-passphrase /media/[DISCO_ENCRIPTADO]/home/.ecryptfs/user/.ecryptfs/wrapped-passphrase
+Para sudo, utilize a senha do seu usuário atual (o usuário do LiveCD);
+
+Após digitar a senha do sudo, será solicitada a Passprase, use a senha do usuário de login (user) do perfil com os arquivos criptografados e que está tentando recuperar.
+
+Será gerada uma chave de 32 dígitos, essa é a Passphrase que irá descriptografar seus arquivos, guarde ela.
+
+
+Passo 2
+Digite o comando:
+sudo ecryptfs-add-passphrase --fnek
+Quando for solicitada a Passphrase, Use a chave de 32 dígitos gerada no passo anterior
+
+Serão gerados duas chaves de 16 dígitos cada, guarde a segunda chave (bbbbbbbbbbbbbbbb).
+
+Saída do comando:
+Inserted auth tok with sig [aaaaaaaaaaaaaaaa] into the user session keyring
+Inserted auth tok with sig [bbbbbbbbbbbbbbbb] into the user session keyring
+
+
+Passo 3
+Vamos lá, agora vamos montar o diretório para que possamos copiar os arquivos e/ou movê-los
+
+Digite o comando para montar os arquivos em modo leitura e escrita (dessa forma Você poderá movê-los para a nova unidade):
+sudo mount -t ecryptfs -rw /media/[DISCO_ANTIGO]/home/.ecryptfs/user/.Private/ /media/[DISCO_BACKUP]/diretorio_recuperados 
+
+Quando solicitada a Passphrase, digite a Passphrase de 32 dígitos gerada no Passo 1;
+
+
+Nesse momento serão necessárias respostas à algumas questões, utilize as respostas à seguir:
+Select cipher: 
+ 1) aes: blocksize = 16; min keysize = 16; max keysize = 32
+ 2) blowfish: blocksize = 8; min keysize = 16; max keysize = 56
+ 3) des3_ede: blocksize = 8; min keysize = 24; max keysize = 24
+ 4) twofish: blocksize = 16; min keysize = 16; max keysize = 32
+ 5) cast6: blocksize = 16; min keysize = 16; max keysize = 32
+ 6) cast5: blocksize = 8; min keysize = 5; max keysize = 16
+Selection [aes]: aes
+Utilize a resposta padrão
+
+Select key bytes: 
+ 1) 16
+ 2) 32
+ 3) 24
+Selection [16]: 16
+Utilize a resposta padrão
+
+Enable plaintext passthrough (y/n) [n]: n
+Utilize a resposta padrão
+
+Enable filename encryption (y/n) [n]: y
+Utilize y ao invés da proposta padrão
+
+Filename Encryption Key (FNEK) Signature [aaaaaaaaaaaaaaaa]: bbbbbbbbbbbbbbbb    
+Utilize a chave de 16 dígitos bbbbbbbbbbbbbbbb gerada no Passo 2 ao invés da chave sugerida
+            
+Attempting to mount with the following options:
+  ecryptfs_unlink_sigs
+  ecryptfs_fnek_sig=bbbbbbbbbbbbbbbb
+  ecryptfs_key_bytes=16
+  ecryptfs_cipher=aes
+  ecryptfs_sig=aaaaaaaaaaaaaaaa
+Mounted eCryptfs
+
+Os arquivos serão montados no diretório /media/[DISCO_BACKUP]/diretorio_recuperados e agora Você tem seus arquivos disponíveis :)
+
+
