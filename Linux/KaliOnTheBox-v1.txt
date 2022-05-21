@@ -1,0 +1,79 @@
+Descrição:
+O Kali, permite diversos tipos de testes de segurança pois suporta uma grande variedade de ferramentas de segurança. Ter o Kali em uma VM pode ser uma boa forma de usá-lo sem alterar seu sistema principal, mas e quando não temos acesso à VM de forma prática? Praticidade foi um dos motivos que me fez buscar uma alternativa como o Kali pra Raspberry Pi e vou mostrar pra Vocês como fiz isso =]
+
+
+Kali On The Box - Colocando o Kali para rodar no Raspberry Pi
+
+Fala galera, tudo bem? 
+
+-> Sumário
+Nesse artigo vou explicar como eu transformei meu Raspberry Pi 3 B+ em um Kali prático, enxuto e funcional;
+
+-> Pra que fazer isso?
+Desafio! Tá aí uma palavra que eu curto! Primeiramente me vi com o desafio de colocar um Kali pra funcionar num Raspberry, tanto pela limitação de hardware quanto pelo tipo não tão convencional de computador achei interessante e desafiador fazer um sistema operacional rodar numa caixinha dessas, e porque não o Kali, não é mesmo? Juntando o útil ao agradável, além de ser desafiador percebi que com um Kali rodando num Raspberry seria muito mais rápido ele estar pronto quando eu precisasse fazer algum scan ou usar alguma ferramenta a partir dele, eu não precisaria ligar o computador toda hora que quisesse utilizar o Kali. Resumindo, é um Kali prático e de certa forma portátil para se usar, é daquelas coisas que Você nem sabia que precisava mas precisava hehehehehe.
+
+
+-> A busca pelo sistema
+Alguém podem dizer "ah, mas é só baixar o iso do site do Kali e instalar", porém como eu queria um sistema enxuto e funcional, o sistema completo não seria uma opção, pois apesar de ser apropriado pra arquitetura ARM do Raspberry, ele é muito pesado pra um hardware desse tamanho e capacidade de processamento. Estudei as opções disponíveis no site da Kali e descobri que seria possível criar uma ISO atualizada somente com os componentes mínimos necessários para usar no Raspberry. Foi nesse estudo que eu encontrei um carinha interessante, o 'Kali ARM Build Scripts' (https://gitlab.com/kalilinux/build-scripts/kali-arm), que é a ferramenta que possibilita a criação dessa ISO enxuta. Esse projeto é mantido pelos próprios responsáveis do Kali e permite criar as ISO's da mesma forma que são criadas as ISO's que são disponibilizadas no site.
+
+
+-> Conhecendo o Kali ARM Build Scripts
+Como já demonstrado no tópico anterior, o Kali ARM Build Scripts está disponível no endereço https://gitlab.com/kalilinux/build-scripts/kali-arm
+
+Esse projeto disponibiliza diversos scripts para diversos tipos de hardware ARM como por exemplo banana-pi, beaglebone, chromebook, nanopi, pinebook e o nosso querido Raspberry Pi, na própria página inicial do projeto Você pode visualizar os diversos tipos de script que estão disponíveis, inclusive estão disponíveis scripts para hardwares os quais as ISO's nem mesmo estão disponíveis na página de downloads do Kali Linux.
+
+Na página inicial do projeto Você encontra também as instruções completas para utilizar os scripts.
+
+
+-> Requisitos
+Para poder utilizá-lo, você vai precisar ter no computador (que precisa ser um Linux :D) em que vai executar o Build Scripts de no mínimo 8Gb de memória RAM ou um SWAP File equivalente;
+Também será necessário espaço em disco para o download dos arquivos para a criação do novo Kali. Apesar de não ser mencionado no projeto qual o tamanho em disco que vai ser necessário, é sempre interessante possuir espaço livre suficiente para baixar uma imagem completa do Kali Linux (aproximadamente 3Gb) isso vai te dar liberdade pra incluir/excluir quaisquer componentes que desejar. A nível de informação, a imagem que criei (apenas o Kali com os utilitários padrão do sistema sem a interface gráfica e sem ferramentas adicionais) ficou com um tamanho de 346Mb.
+Para utilizar o Build Scripts também será necessário ter instalado o utilitário git no seu computador, confira se sua máquina tem esse utilitário, e se não tiver basta instalá-lo através do seu gerenciador de pacotes. Para Debian like basta usar "sudo apt install git".
+
+
+-> Mãos à obra
+
+As etapas que vamos seguir serão:
+1 - Clonar o projeto para a sua máquina;
+2 - Instalar as dependências do Build Scripts;
+3 - Executar o utilitário para gerar a imagem com os itens e características que desejar;
+4 - Colocar pra rodar
+
+
+1 - Clonar o projeto para a sua máquina
+Após garantir que possui o utilitário git, basta usar o comando abaixo pra clonar (baixar) o projeto para o seu computador:
+
+git clone https://gitlab.com/kalilinux/build-scripts/kali-arm
+
+Ao finalizar, Você terá uma cópia do projeto na sua máquina, ou seja, todos os utilitários estarão disponíveis para Você utilizar.
+
+
+2 - Instalar as dependências do Build Scripts
+Para instalar as dependências, basta entrar no diretório que acabou de ser baixado (kali-arm) e execute o seguinte comando:
+
+sudo ./common.d/build_deps.sh
+
+Observação: Aguarde até que a execução finalize, essa etapa pode demorar um pouco dependendo da quantidade de dependências que ainda é necessário instalar no seu Linux;
+
+3 - Executar o utilitário para gerar a imagem com os itens e características que desejar
+Para o meu caso, eu utilizei o script para o raspberry-pi, note que há alguns parâmetros para esse script, além dos que eu utilizei, há alguns outros que podem ser úteis a depender de qual tipo de imagem Você deseja criar. Para o meu caso utilizei:
+
+--arch arm64 - Que significa que quero gerar uma imagem para arquitetura arm64
+--slim - Que significa que quero uma imagem sem a interface gráfica mas que tenha os utilitários padrão do sistema
+
+O comando que executei foi:
+
+./raspberry-pi.sh --arch arm64 --slim
+
+Observação: Para visualizar outros comandos, basta digitar ./raspberry-pi.sh --help ou ./raspberry-pi.sh -h
+
+
+4 - Colocar pra rodar
+Após a execução do comando de criação da imagem (Etapa 3) estará disponível no diretório (kali-arm/images) a imagem do Kali pronta pra ser utilizada no Rasp. Após isso, basta usar o utilitário do próprio Rasperry (https://www.raspberrypi.com/software/) para criar o cartão SD com o seu Kali. Ah e claro, depois de funcionando, é possível instalar as ferramentas que quiser para seu Kali, somente lembre-se de que está em um hardware limitado ;)
+
+
+-> Conclusão
+Nesse artigo pude mostrar um pouco dos passos que segui para poder criar um Kali enxuto e funcional utilizando um Raspberry Pi 3B+. No artigo foi possível encontrar o que me motivou a fazer isso, as etapas base que segui e também algumas outras informações sobre o projeto Kali ARM Build Scripts. Estas foram as etapas para fazer o sistema funcionar no Raspberry, porém sobre as ferramentas que instalei e o porque, fica para um próximo artigo ;)
+
+
+
